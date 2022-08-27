@@ -11,7 +11,7 @@ on `self-reference` crate. you only can initialize reference object that has `'s
 The major difference from other self-referential crate is initializing referential object.
 you only can initialize reference object that has `'static` lifetime
 
-```
+```rust
 let mut reference: SelfReference<String, MutRef<str>> = SelfReference::new(String::new(), || {
     // you can't get reference of object while initialization.
     // only possible cases are reference that has `'static` lifetime.
@@ -27,7 +27,7 @@ reference.projection();
 
 The only way to initialize reference object is using `reset` method. remember!! you can use reset method when `SelfReference` object is pinned.
 
-```
+```rust
 let mut reference: SelfReference<String, OptionMutRef<str>> = SelfReference::new(String::new(), || "");
 pin_mut!(reference);
 
