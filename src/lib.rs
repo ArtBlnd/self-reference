@@ -5,8 +5,10 @@ pub use refs::*;
 
 use core::pin::Pin;
 
+
+/// A Self-Referential Helper.
 #[pin_project::pin_project]
-pub(crate) struct SelfReference<T, R>
+pub struct SelfReference<T, R>
 where
     for<'this> R: RefDef<'this>
 {
@@ -22,8 +24,8 @@ impl<T, R> SelfReference<T, R>
 where
     for<'this> R: RefDef<'this>
 {
-    // You are never able to "hold" object before its pinned.
-    // try initializing as empty static object. (using Option, NonNull or Empty enum field)
+    /// You are never able to "hold" object before its pinned.
+    /// try initializing as empty static object. (using Option, NonNull or Empty enum field)
     pub fn new<F>(object: T, init: F) -> Self 
     where
         F: FnOnce() -> <R as RefDef<'static>>::Type
@@ -34,16 +36,16 @@ where
         }
     }
 
-    // get referencial object that has self lifetime.
-    // We are returning pinned object. which is safe.
+    /// get referencial object that has self lifetime.
+    /// We are returning pinned object. which is safe.
     pub fn projection<'s>(self: Pin<&'s mut Self>) -> Pin<&'s mut <R as RefDef<'s>>::Type> {
         let referential = self.project().referential;
         unsafe { detach_lifetime_pin::<R>(referential) }
     }
 
-    // reset referenceial object using object.
-    // object is now pinned so initializing referential type is safe.
-    // This can be useful when you consumed your own reference. (like in AsyncIterator)
+    /// reset referenceial object using object.
+    /// object is now pinned so initializing referential type is safe.
+    /// This can be useful when you consumed your own reference. (like in AsyncIterator)
     pub fn reset<'s, F>(self: Pin<&'s mut Self>, f: F)
     where
         F: FnOnce(Pin<&'s mut T>) -> <R as RefDef<'s>>::Type
