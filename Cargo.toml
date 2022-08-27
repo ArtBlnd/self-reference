@@ -1,0 +1,14 @@
+[package]
+name = "self-reference"
+description = "A Self-Reference Helper"
+license-file = "LICENSE.txt"
+readme = "README.md"
+version = "0.1.0"
+edition = "2018"
+categories = [""]
+keywords = ["self-reference", "pin"]
+repository = "https://github.com/ArtBlnd/self-reference"
+
+
+[dependencies]
+pin-project = "1.0.12"
