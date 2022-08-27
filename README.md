@@ -28,9 +28,10 @@ reference.projection();
 The only way to initialize reference object is using `reset` method. remember!! you can use reset method when `SelfReference` object is pinned.
 
 ```
-let mut reference: SelfReference<String, OptionMutRef<str>> = SelfReference::new(String::new(), || "");
+let mut reference: SelfReference<String, OptionMutRef<str>> = SelfReference::new("self-reference".to_string(), || "");
 pin_mut!(reference);
 
 // You can reset object to set referencial object to hold object itself.
 reference.reset(|s| Some(s.get_mut()));
+println!("{}", reference.projection().get_ref()); // prints "self-reference"
 ```
