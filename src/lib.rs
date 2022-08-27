@@ -1,3 +1,5 @@
+#![no_std]
+
 mod utils;
 pub(crate) use utils::*;
 mod refs;
