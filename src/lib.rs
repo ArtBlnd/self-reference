@@ -15,10 +15,9 @@ use core::marker::PhantomPinned;
 use core::pin::Pin;
 
 use pin_project::pin_project;
-use pin_project::UnsafeUnpin;
 
 /// A Self-Referential Helper.
-#[pin_project(UnsafeUnpin)]
+#[pin_project]
 pub struct SelfReference<T, R>
 where
     for<'this> R: RefDef<'this>,
@@ -32,15 +31,6 @@ where
 
     // Self-Reference object should not be UNPINNED!!
     __p: PhantomPinned,
-}
-
-// We can implement Unpin if value of object is stable and reference type implements Unpin.
-unsafe impl<T, R> UnsafeUnpin for SelfReference<T, R>
-where
-    for<'this> R: RefDef<'this>,
-    for<'this> <R as RefDef<'this>>::Type: Unpin,
-    T: StablePtr
-{
 }
 
 impl<T, R> SelfReference<T, R>
