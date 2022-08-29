@@ -12,7 +12,7 @@ The major difference from other self-referential crate is initializing referenti
 you only can initialize reference object that has `'static` lifetime
 
 ```rust
-let mut reference: SelfReference<String, MutRef<str>> = SelfReference::new(String::new(), || {
+let mut reference: SelfReference<String, Ref<str>> = SelfReference::new(String::new(), || {
     // you can't get reference of object while initialization.
     // only possible cases are reference that has `'static` lifetime.
     ""
@@ -20,7 +20,7 @@ let mut reference: SelfReference<String, MutRef<str>> = SelfReference::new(Strin
 pin_mut!(reference);
 
 // this is totally SAFE. this lowers `'static` lifetime into some other lifetime.
-reference.projection();
+reference.get_ref();
 ```
 
 # Reset Mechanism
@@ -28,10 +28,10 @@ reference.projection();
 The only way to initialize reference object is using `reset` method. remember!! you can use reset method when `SelfReference` object is pinned.
 
 ```rust
-let mut reference: SelfReference<String, OptionMutRef<str>> = SelfReference::new("self-reference".to_string(), || None);
+let mut reference: SelfReference<String, Ref<str>> = SelfReference::new("self-reference".to_string(), || "");
 pin_mut!(reference);
 
 // You can reset object to set referencial object to hold object itself.
-reference.reset(|s| Some(s.get_mut()));
-println!("{}", reference.projection().get_ref()); // prints "self-reference"
+reference.reset_unpin(|s| &s[..4]);
+println!("{}", reference.get_ref()); // prints "self"
 ```
