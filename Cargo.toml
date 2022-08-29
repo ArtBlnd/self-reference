@@ -12,3 +12,7 @@ repository = "https://github.com/ArtBlnd/self-reference"
 
 [dependencies]
 pin-project = "1.0.12"
+
+[features]
+default = ["std"]
+std = []
