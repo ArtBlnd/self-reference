@@ -22,9 +22,19 @@ where
 }
 
 #[inline]
-pub unsafe fn detach_lifetime_pin<'this, R: ?Sized>(
+pub unsafe fn detach_lifetime_pin_mut<'this, R: ?Sized>(
     v: Pin<&mut <R as RefDef<'_>>::Type>,
 ) -> Pin<&'this mut <R as RefDef<'this>>::Type>
+where
+    for<'a> R: RefDef<'a>,
+{
+    mem::transmute(v)
+}
+
+#[inline]
+pub unsafe fn detach_lifetime_pin_ref<'this, R: ?Sized>(
+    v: Pin<&<R as RefDef<'_>>::Type>,
+) -> Pin<&'this <R as RefDef<'this>>::Type>
 where
     for<'a> R: RefDef<'a>,
 {
