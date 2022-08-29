@@ -3,10 +3,10 @@ name = "self-reference"
 description = "A Self-Reference Helper"
 license-file = "LICENSE.txt"
 readme = "README.md"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2018"
-categories = [""]
-keywords = ["self-reference", "pin"]
+categories = ["no-std", "rust-patterns"]
+keywords = ["self-reference", "pin", "no_std"]
 repository = "https://github.com/ArtBlnd/self-reference"
 
 
