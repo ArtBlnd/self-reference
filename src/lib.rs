@@ -20,7 +20,8 @@ use stable_deref_trait::StableDeref;
 #[pin_project(UnsafeUnpin)]
 pub struct SelfReference<'a, T, R>
 where
-    for<'this> R: RefDef<'this> + 'a,
+    for<'this> R: RefDef<'this>,
+    for<'this> <R as RefDef<'this>>::Type: 'a,
 {
     // SAFETY-NOTE: 'static lifetime is only for placeholder because there is no like 'this or 'phantom lifetime on rust.
     //              using referential object as 'static lifetime is unsound! NEVER use it.
@@ -35,6 +36,7 @@ where
 impl<'a, T, R> SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
+    for<'this> <R as RefDef<'this>>::Type: 'a,
 {
     /// You will "never" able to hold object before its pinned.
     /// try initializing as empty static object. (using Option, NonNull or Empty enum field)
@@ -94,6 +96,7 @@ where
 impl<'a, T, R> SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
+    for<'this> <R as RefDef<'this>>::Type: 'a,
     for<'this> <R as RefDef<'this>>::Type: Unpin,
 {
     /// get mutable referencial object that has self lifetime.
@@ -110,6 +113,7 @@ where
 impl<'a, T, R> SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
+    for<'this> <R as RefDef<'this>>::Type: 'a,
     T: Unpin,
 {
     /// reset referenceial object using unpinned object.
@@ -129,6 +133,7 @@ where
 unsafe impl<'a, T, R> UnsafeUnpin for SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
+    for<'this> <R as RefDef<'this>>::Type: 'a,
     T: StableDeref,
 {
 }
