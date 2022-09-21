@@ -8,16 +8,16 @@ pub(crate) use utils::*;
 
 mod refs;
 pub use refs::*;
-mod stable_ptr;
-pub use stable_ptr::*;
 
 use core::marker::PhantomPinned;
+use core::ops::DerefMut;
 use core::pin::Pin;
 
-use pin_project::pin_project;
+use pin_project::{pin_project, UnsafeUnpin};
+use stable_deref_trait::StableDeref;
 
 /// A Self-Referential Helper.
-#[pin_project]
+#[pin_project(UnsafeUnpin)]
 pub struct SelfReference<T, R>
 where
     for<'this> R: RefDef<'this>,
@@ -29,8 +29,7 @@ where
     #[pin]
     object: T,
 
-    // Self-Reference object should not be UNPINNED!!
-    __p: PhantomPinned,
+    __private: PhantomPinned,
 }
 
 impl<T, R> SelfReference<T, R>
@@ -46,7 +45,21 @@ where
         Self {
             object,
             referential: (init)(),
-            __p: PhantomPinned,
+            __private: PhantomPinned,
+        }
+    }
+
+    pub fn new_stable<F>(mut object: T, init: F) -> Self
+    where
+        T: StableDeref + DerefMut,
+        F: FnOnce(&mut T::Target) -> <R as RefDef<'_>>::Type,
+    {
+        let referential = unsafe { detach_lifetime_ref::<R>((init)(object.deref_mut())) };
+
+        Self {
+            object,
+            referential,
+            __private: PhantomPinned,
         }
     }
 
@@ -109,4 +122,11 @@ where
         let value = unsafe { detach_lifetime_ref::<R>((f)(proj.object.get_mut())) };
         proj.referential.set(value);
     }
+}
+
+unsafe impl<T, R> UnsafeUnpin for SelfReference<T, R>
+where
+    for<'this> R: RefDef<'this>,
+    T: StableDeref,
+{
 }
