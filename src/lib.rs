@@ -20,7 +20,7 @@ use stable_deref_trait::StableDeref;
 #[pin_project(UnsafeUnpin)]
 pub struct SelfReference<'a, T, R>
 where
-    for<'this> R: RefDef<'this>,
+    for<'this> R: RefDef<'this> + 'a,
 {
     // SAFETY-NOTE: 'static lifetime is only for placeholder because there is no like 'this or 'phantom lifetime on rust.
     //              using referential object as 'static lifetime is unsound! NEVER use it.
