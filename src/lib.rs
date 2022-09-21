@@ -18,21 +18,21 @@ use stable_deref_trait::StableDeref;
 
 /// A Self-Referential Helper.
 #[pin_project(UnsafeUnpin)]
-pub struct SelfReference<T, R>
+pub struct SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
 {
     // SAFETY-NOTE: 'static lifetime is only for placeholder because there is no like 'this or 'phantom lifetime on rust.
     //              using referential object as 'static lifetime is unsound! NEVER use it.
     #[pin]
-    referential: <R as RefDef<'static>>::Type,
+    referential: <R as RefDef<'a>>::Type,
     #[pin]
     object: T,
 
     __private: PhantomPinned,
 }
 
-impl<T, R> SelfReference<T, R>
+impl<'a, T, R> SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
 {
@@ -42,9 +42,11 @@ where
     where
         F: FnOnce() -> <R as RefDef<'static>>::Type,
     {
+        let referential = unsafe { detach_lifetime_ref::<R>((init)()) };
+
         Self {
             object,
-            referential: (init)(),
+            referential,
             __private: PhantomPinned,
         }
     }
@@ -89,7 +91,7 @@ where
     }
 }
 
-impl<T, R> SelfReference<T, R>
+impl<'a, T, R> SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
     for<'this> <R as RefDef<'this>>::Type: Unpin,
@@ -105,7 +107,7 @@ where
     }
 }
 
-impl<T, R> SelfReference<T, R>
+impl<'a, T, R> SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
     T: Unpin,
@@ -124,7 +126,7 @@ where
     }
 }
 
-unsafe impl<T, R> UnsafeUnpin for SelfReference<T, R>
+unsafe impl<'a, T, R> UnsafeUnpin for SelfReference<'a, T, R>
 where
     for<'this> R: RefDef<'this>,
     T: StableDeref,
