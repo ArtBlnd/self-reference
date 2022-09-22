@@ -3,7 +3,7 @@ name = "self-reference"
 description = "A Self-Reference Helper"
 license-file = "LICENSE.txt"
 readme = "README.md"
-version = "0.1.10"
+version = "0.2.0"
 edition = "2018"
 categories = ["no-std", "rust-patterns"]
 keywords = ["self-reference", "pin", "no_std"]
@@ -11,6 +11,7 @@ repository = "https://github.com/ArtBlnd/self-reference"
 
 
 [dependencies]
+futures = "0.3.24"
 pin-project = "1.0.12"
 stable_deref_trait = "1.2.0"
 

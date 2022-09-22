@@ -20,12 +20,12 @@ use stable_deref_trait::StableDeref;
 #[pin_project(UnsafeUnpin)]
 pub struct SelfReference<'a, T, R>
 where
-    R: RefDef<'a>
+    R: RefDef + 'a,
 {
     // SAFETY-NOTE: 'static lifetime is only for placeholder because there is no like 'this or 'phantom lifetime on rust.
     //              using referential object as 'static lifetime is unsound! NEVER use it.
     #[pin]
-    referential: <R as RefDef<'a>>::Type,
+    referential: R::Type<'a>,
     #[pin]
     object: T,
 
@@ -34,13 +34,14 @@ where
 
 impl<'a, T, R> SelfReference<'a, T, R>
 where
-    for<'this> R: RefDef<'this>,
+    R: RefDef + 'a,
 {
     /// You will "never" able to hold object before its pinned.
     /// try initializing as empty static object. (using Option, NonNull or Empty enum field)
     pub fn new<F>(object: T, init: F) -> Self
     where
-        F: FnOnce() -> <R as RefDef<'static>>::Type,
+        R: 'static,
+        F: FnOnce() -> R::Type<'static>,
     {
         let referential = unsafe { detach_lifetime_ref::<R>((init)()) };
 
@@ -54,7 +55,7 @@ where
     pub fn new_stable<F>(mut object: T, init: F) -> Self
     where
         T: StableDeref + DerefMut,
-        F: FnOnce(&mut T::Target) -> <R as RefDef<'_>>::Type,
+        F: FnOnce(&mut T::Target) -> R::Type<'_>,
     {
         let referential = unsafe { detach_lifetime_ref::<R>((init)(object.deref_mut())) };
 
@@ -70,7 +71,7 @@ where
     /// This is also useful when you consumed your own reference. (like in AsyncIterator)
     pub fn reset<'s, F>(self: Pin<&'s mut Self>, f: F)
     where
-        F: FnOnce(Pin<&'s mut T>) -> <R as RefDef<'s>>::Type,
+        F: FnOnce(Pin<&'s mut T>) -> R::Type<'s>,
     {
         let mut proj = self.project();
 
@@ -79,13 +80,13 @@ where
     }
 
     /// get pinned mutable referencial object that has self lifetime.
-    pub fn pin_mut<'s>(self: Pin<&'s mut Self>) -> Pin<&'s mut <R as RefDef<'s>>::Type> {
+    pub fn pin_mut<'s>(self: Pin<&'s mut Self>) -> Pin<&'s mut R::Type<'s>> {
         let referential = self.project().referential;
         unsafe { detach_lifetime_pin_mut::<R>(referential) }
     }
 
     /// get pinned referencial object that has self lifetime.
-    pub fn pin_ref<'s>(self: Pin<&'s Self>) -> Pin<&'s <R as RefDef<'s>>::Type> {
+    pub fn pin_ref<'s>(self: Pin<&'s Self>) -> Pin<&'s R::Type<'s>> {
         let referential = self.project_ref().referential;
         unsafe { detach_lifetime_pin_ref::<R>(referential) }
     }
@@ -93,25 +94,7 @@ where
 
 impl<'a, T, R> SelfReference<'a, T, R>
 where
-    for<'this> R: RefDef<'this>,
-    for<'this> <R as RefDef<'this>>::Type: 'a,
-    for<'this> <R as RefDef<'this>>::Type: Unpin,
-{
-    /// get mutable referencial object that has self lifetime.
-    pub fn get_mut<'s>(self: Pin<&'s mut Self>) -> &'s mut <R as RefDef<'s>>::Type {
-        self.pin_mut().get_mut()
-    }
-
-    /// get referencial object that has self lifetime.
-    pub fn get_ref<'s>(self: Pin<&'s Self>) -> &'s <R as RefDef<'s>>::Type {
-        self.pin_ref().get_ref()
-    }
-}
-
-impl<'a, T, R> SelfReference<'a, T, R>
-where
-    for<'this> R: RefDef<'this>,
-    for<'this> <R as RefDef<'this>>::Type: 'a,
+    R: RefDef,
     T: Unpin,
 {
     /// reset referenceial object using unpinned object.
@@ -119,7 +102,7 @@ where
     /// This is also useful when you consumed your own reference. (like in AsyncIterator)
     pub fn reset_unpin<'s, F>(self: Pin<&'s mut Self>, f: F)
     where
-        F: FnOnce(&'s mut T) -> <R as RefDef<'s>>::Type,
+        F: FnOnce(&'s mut T) -> R::Type<'s>,
     {
         let mut proj = self.project();
 
@@ -128,10 +111,34 @@ where
     }
 }
 
+impl<'a, T, R> SelfReference<'a, T, R>
+where
+    R: RefDef,
+    T: StableDeref
+{
+    pub fn map<'s, F, N>(self, f: F) -> SelfReference<'a, T, N>
+    where
+        for<'this> <R as refs::RefDef>::Type<'this>: Unpin,
+        T: 's,
+        R: 's,
+        
+        N: RefDef + 's,
+        F: FnOnce(R::Type<'s>) -> N::Type<'s>,
+    {
+        let r = unsafe { detach_lifetime_ref::<R>(self.referential) };
+        let r = unsafe { detach_lifetime_ref::<N>((f)(r)) };
+
+        SelfReference {
+            object: self.object,
+            referential: r,
+            __private: PhantomPinned
+        }
+    }
+}
+
 unsafe impl<'a, T, R> UnsafeUnpin for SelfReference<'a, T, R>
 where
-    for<'this> R: RefDef<'this>,
-    for<'this> <R as RefDef<'this>>::Type: 'a,
+    R: RefDef,
     T: StableDeref,
 {
 }

@@ -2,70 +2,48 @@ use core::marker::PhantomData;
 use core::pin::Pin;
 
 // Reference gateway
-pub trait RefDef<'this> {
-    type Type;
+pub trait RefDef {
+    type Type<'this>
+    where
+        Self: 'this;
 }
 
 pub struct Mut<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for Mut<T>
-where
-    T: 'this,
-{
-    type Type = &'this mut T;
+impl<T: ?Sized> RefDef for Mut<T> {
+    type Type<'this> = &'this mut T where T: 'this;
 }
 
 pub struct OptionMut<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for OptionMut<T>
-where
-    T: 'this,
-{
-    type Type = Option<&'this mut T>;
+impl<T: ?Sized> RefDef for OptionMut<T> {
+    type Type<'this> = Option<&'this mut T> where T: 'this;
 }
 
 pub struct Ref<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for Ref<T>
-where
-    T: 'this,
-{
-    type Type = &'this T;
+impl<T: ?Sized> RefDef for Ref<T> {
+    type Type<'this> = &'this T where T: 'this;
 }
 
 pub struct OptionRef<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for OptionRef<T>
-where
-    T: 'this,
-{
-    type Type = Option<&'this T>;
+impl<T: ?Sized> RefDef for OptionRef<T> {
+    type Type<'this> = Option<&'this T> where T: 'this;
 }
 
 pub struct PinMut<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for PinMut<T>
-where
-    T: 'this,
-{
-    type Type = Pin<&'this mut T>;
+impl<T: ?Sized> RefDef for PinMut<T> {
+    type Type<'this> = Pin<&'this mut T> where T: 'this;
 }
 
 pub struct OptionPinMut<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for OptionPinMut<T>
-where
-    T: 'this,
-{
-    type Type = Option<Pin<&'this mut T>>;
+impl<T: ?Sized> RefDef for OptionPinMut<T> {
+    type Type<'this> = Option<Pin<&'this mut T>> where T: 'this;
 }
 
 pub struct PinRef<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for PinRef<T>
-where
-    T: 'this,
-{
-    type Type = Pin<&'this T>;
+impl<T: ?Sized> RefDef for PinRef<T> {
+    type Type<'this> = Pin<&'this T> where T: 'this;
 }
 
 pub struct OptionPinRef<T: ?Sized>(PhantomData<T>);
-impl<'this, T: ?Sized> RefDef<'this> for OptionPinRef<T>
-where
-    T: 'this,
-{
-    type Type = Option<Pin<&'this T>>;
+impl<T: ?Sized> RefDef for OptionPinRef<T> {
+    type Type<'this> = Option<Pin<&'this T>> where T: 'this;
 }
