@@ -134,6 +134,10 @@ where
             __private: PhantomPinned
         }
     }
+
+    pub fn into_inner(self) -> T {
+        self.object
+    }
 }
 
 unsafe impl<'a, T, R> UnsafeUnpin for SelfReference<'a, T, R>
