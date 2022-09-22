@@ -1,3 +1,7 @@
+# PLEASE READ THIS
+This project is not product ready. I am going to polish everything when GAT is merged.
+
+
 # Self-Reference
 A Self-Refernece Helper (Inspired From [Selfie](https://github.com/prokopyl/selfie))
 
