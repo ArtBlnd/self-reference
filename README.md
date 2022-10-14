@@ -1,5 +1,5 @@
 # PLEASE READ THIS
-This project is not product ready. I am going to polish everything when GAT is merged.
+This project is not product ready. I am going to polish everything when GAT is on stable.
 
 
 # Self-Reference
