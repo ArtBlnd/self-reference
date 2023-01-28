@@ -135,6 +135,15 @@ where
         }
     }
 
+    pub fn get_ref<'s>(&'s self) -> &'s R::Type<'s> {
+        unsafe { detach_lifetime_get_ref::<R>(&self.referential) }
+    }
+
+    // get mutable reference from stable referential object.
+    pub fn get_mut<'s>(&'s mut self) -> &'s mut R::Type<'s> {
+        unsafe { detach_lifetime_get_mut::<R>(&mut self.referential) }
+    }
+
     pub fn into_inner(self) -> T {
         self.object
     }
