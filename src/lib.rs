@@ -22,8 +22,8 @@ pub struct SelfReference<'a, T, R>
 where
     R: RefDef + 'a,
 {
-    // SAFETY-NOTE: 'static lifetime is only for placeholder because there is no like 'this or 'phantom lifetime on rust.
-    //              using referential object as 'static lifetime is unsound! NEVER use it.
+    // SAFETY-NOTE: 'a lifetime is only for placeholder because there is no like 'this or 'phantom lifetime on rust.
+    //              using referential object as 'a lifetime is unsound! NEVER use it.
     #[pin]
     referential: R::Type<'a>,
     #[pin]
@@ -52,6 +52,7 @@ where
         }
     }
 
+    /// Create new SelfReference with stable pointer object
     pub fn new_stable<F>(mut object: T, init: F) -> Self
     where
         T: StableDeref + DerefMut,
@@ -114,14 +115,15 @@ where
 impl<'a, T, R> SelfReference<'a, T, R>
 where
     R: RefDef,
-    T: StableDeref
+    T: StableDeref,
 {
+    /// Construct new SelfReference object with current object
     pub fn map<'s, F, N>(self, f: F) -> SelfReference<'a, T, N>
     where
         for<'this> <R as refs::RefDef>::Type<'this>: Unpin,
         T: 's,
         R: 's,
-        
+
         N: RefDef + 's,
         F: FnOnce(R::Type<'s>) -> N::Type<'s>,
     {
@@ -131,7 +133,7 @@ where
         SelfReference {
             object: self.object,
             referential: r,
-            __private: PhantomPinned
+            __private: PhantomPinned,
         }
     }
 
@@ -139,7 +141,7 @@ where
         unsafe { detach_lifetime_get_ref::<R>(&self.referential) }
     }
 
-    // get mutable reference from stable referential object.
+    /// get mutable reference from stable referential object.
     pub fn get_mut<'s>(&'s mut self) -> &'s mut R::Type<'s> {
         unsafe { detach_lifetime_get_mut::<R>(&mut self.referential) }
     }
