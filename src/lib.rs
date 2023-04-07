@@ -81,21 +81,13 @@ where
     }
 
     /// get pinned mutable referencial object that has self lifetime.
-    pub fn pin_mut<'s, 'x>(self: Pin<&'s mut Self>) -> Pin<&'s mut R::Type<'x>>
-    where
-        'x: 'a,
-    {
-        let referential = self.project().referential;
-        unsafe { detach_lifetime_pin_mut::<R>(referential) }
+    pub fn pin_mut<'s>(self: Pin<&'s mut Self>) -> Pin<&'s mut R::Type<'a>> {
+        self.project().referential
     }
 
     /// get pinned referencial object that has self lifetime.
-    pub fn pin_ref<'s, 'x>(self: Pin<&'s Self>) -> Pin<&'s R::Type<'x>>
-    where
-        'x: 'a,
-    {
-        let referential = self.project_ref().referential;
-        unsafe { detach_lifetime_pin_ref::<R>(referential) }
+    pub fn pin_ref<'s>(self: Pin<&'s Self>) -> Pin<&'s R::Type<'a>> {
+        self.project_ref().referential
     }
 }
 
@@ -143,27 +135,13 @@ where
         }
     }
 
-    pub fn get_ref<'s, 'x>(&'s self) -> &'s R::Type<'x>
-    where
-        'x: 'a,
-    {
-        unsafe { detach_lifetime_get_ref::<R>(&self.referential) }
+    pub fn get_ref<'s>(&'s self) -> &'s R::Type<'a> {
+        &self.referential
     }
 
     /// get mutable reference from stable referential object.
-    pub fn get_mut<'s, 'x>(&'s mut self) -> &'s mut R::Type<'x>
-    where
-        'x: 'a,
-    {
-        unsafe { detach_lifetime_get_mut::<R>(&mut self.referential) }
-    }
-
-    pub fn with_mut<'s, F, V>(&'s mut self, f: F) -> V
-    where
-        for<'this> F: FnOnce(&'s mut R::Type<'this>) -> V,
-    {
-        let r = unsafe { detach_lifetime_get_mut::<R>(&mut self.referential) };
-        f(r)
+    pub fn get_mut<'s>(&'s mut self) -> &'s mut R::Type<'a> {
+        &mut self.referential
     }
 
     pub fn into_inner(self) -> T {
