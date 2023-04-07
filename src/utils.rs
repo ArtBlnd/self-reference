@@ -19,7 +19,9 @@ where
 }
 
 #[inline]
-pub unsafe fn detach_lifetime_get_ref<'this, R: ?Sized>(v: &'this R::Type<'_>) -> &'this R::Type<'this>
+pub unsafe fn detach_lifetime_get_ref<'x, 'y, 'z: 'y, R: ?Sized>(
+    v: &'x R::Type<'y>,
+) -> &'x R::Type<'z>
 where
     R: RefDef,
 {
@@ -32,7 +34,9 @@ where
 }
 
 #[inline]
-pub unsafe fn detach_lifetime_get_mut<'this, R: ?Sized>(v: &'this mut R::Type<'_>) -> &'this mut R::Type<'this>
+pub unsafe fn detach_lifetime_get_mut<'x, 'y, 'z: 'y, R: ?Sized>(
+    v: &'x mut R::Type<'y>,
+) -> &'x mut R::Type<'z>
 where
     R: RefDef,
 {
@@ -45,9 +49,9 @@ where
 }
 
 #[inline]
-pub unsafe fn detach_lifetime_pin_mut<'this, R: ?Sized>(
-    v: Pin<&mut R::Type<'_>>,
-) -> Pin<&'this mut R::Type<'this>>
+pub unsafe fn detach_lifetime_pin_mut<'x, 'y, 'z: 'y, R: ?Sized>(
+    v: Pin<&'x mut R::Type<'y>>,
+) -> Pin<&'x mut R::Type<'z>>
 where
     R: RefDef,
 {
@@ -55,9 +59,9 @@ where
 }
 
 #[inline]
-pub unsafe fn detach_lifetime_pin_ref<'this, R: ?Sized>(
-    v: Pin<&R::Type<'_>>,
-) -> Pin<&'this R::Type<'this>>
+pub unsafe fn detach_lifetime_pin_ref<'x, 'y, 'z: 'y, R: ?Sized>(
+    v: Pin<&'x R::Type<'y>>,
+) -> Pin<&'x R::Type<'z>>
 where
     R: RefDef,
 {
